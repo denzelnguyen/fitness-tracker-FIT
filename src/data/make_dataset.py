@@ -49,21 +49,24 @@ df_subjects = df_subjects.rename(columns={'code': 'user_id'})
 
 all_df = pd.merge(all_df, df_subjects, on='user_id', how='left')
 
-# 5. Cleaning and Renaming
+
+# 5. Cleaning and Feature Construction
 
 if "Unnamed: 0" in all_df.columns:
     del all_df["Unnamed: 0"]
 
+all_df["acc_x"] = all_df["userAcceleration.x"] + all_df["gravity.x"]
+all_df["acc_y"] = all_df["userAcceleration.y"] + all_df["gravity.y"]
+all_df["acc_z"] = all_df["userAcceleration.z"] + all_df["gravity.z"]
+
 all_df.rename(columns={
-    'userAcceleration.x': 'acc_x',
-    'userAcceleration.y': 'acc_y',
-    'userAcceleration.z': 'acc_z',
     'rotationRate.x': 'gyr_x',
     'rotationRate.y': 'gyr_y',
     'rotationRate.z': 'gyr_z'
 }, inplace=True)
 
 all_df.dropna(inplace=True)
+
 
 # 6. Working with Datetimes (50Hz = 20ms)
 

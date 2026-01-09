@@ -13,7 +13,7 @@ df = pd.read_pickle("../../data/processed/data_processed.pkl")
 
 os.makedirs("../../reports/figures/", exist_ok=True)
 
-# 2. Data Balance (Check samples per category)
+# 2. Data Balance
 
 balance = df["category"].value_counts().sort_index()
 
@@ -26,9 +26,10 @@ plt.tight_layout()
 plt.savefig("../../reports/figures/data_balance.png", dpi=150)
 plt.show()
 
-# 3. Explore Single Columns (Raw Signal Inspection)
+# 3. Explore Single Columns
 
-set_df = df[df["set"] == df["set"].iloc[0]]
+set_id = df["set"].iloc[0]
+set_df = df[df["set"] == set_id]
 
 plt.figure()
 plt.plot(set_df["acc_y"].reset_index(drop=True))
@@ -39,7 +40,7 @@ plt.tight_layout()
 plt.savefig("../../reports/figures/raw_signal_acc_y.png", dpi=150)
 plt.show()
 
-# 4. Plot All Activities (Time-series Comparison)
+# 4. Plot All Activities
 
 labels = sorted(df["category"].unique())
 
@@ -58,7 +59,7 @@ for label in labels:
     plt.savefig(f"../../reports/figures/timeseries_{label}.png", dpi=150)
     plt.show()
 
-# 5. Compare Participants (User Differences)
+# 5. Compare Participants
 
 activity = "wlk"
 users = df[df["category"] == activity]["user_id"].unique()[:2]
@@ -76,7 +77,7 @@ plt.tight_layout()
 plt.savefig(f"../../reports/figures/user_comparison_{activity}.png", dpi=150)
 plt.show()
 
-# 6. Multiple Axes Plot (3-axis Movement)
+# 6. Multiple Axes Plot
 
 label = "jog"
 user = df[df["category"] == label]["user_id"].iloc[0]
@@ -119,7 +120,7 @@ plt.tight_layout()
 plt.savefig("../../reports/figures/boxplot_acc_y.png", dpi=150)
 plt.show()
 
-# 8. Motion Shape (Scatter Plot)
+# 8. Motion Shape
 
 scatter_df = df.sample(5000, random_state=42)
 
@@ -138,7 +139,7 @@ plt.tight_layout()
 plt.savefig("../../reports/figures/scatter_motion_shape.png", dpi=150)
 plt.show()
 
-# 9. Mass Export Figures (Acc + Gyro)
+# 9. Mass Export Figures
 
 test_users = df["user_id"].unique()[:3]
 
