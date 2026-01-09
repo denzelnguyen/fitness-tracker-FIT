@@ -35,10 +35,10 @@ for f in files:
     df = pd.read_csv(f)
 
     df["user_id"] = user_id
-    df["label"] = LABEL_MAP.get(activity)
+    df["label"] = LABEL_MAP[activity]
     df["category"] = activity
     df["set"] = data_set
-    
+
     all_df = pd.concat([all_df, df], ignore_index=True)
     data_set += 1
 
@@ -89,11 +89,42 @@ sampling = {
     "gender": "last"
 }
 
-data_resampled = all_df.groupby(["user_id", "set"]).resample("200ms").agg(sampling).dropna()
+data_resampled = (
+    all_df
+    .groupby(["user_id", "set"])
+    .resample("200ms")
+    .agg(sampling)
+    .dropna()
+)
+
 data_resampled.reset_index(drop=True, inplace=True)
 
-# 8. Export Processed Data
+# 8. User-based Split (Train / Validation / Test)
 
-output_path = "../../data/interim/01_data_processed.pkl"
-os.makedirs(os.path.dirname(output_path), exist_ok=True)
-data_resampled.to_pickle(output_path)
+users = sorted(data_resampled["user_id"].unique())
+
+train_users = users[:18]
+val_users = users[18:21]
+test_users = users[21:]
+
+train_df = data_resampled[data_resampled["user_id"].isin(train_users)]
+val_df = data_resampled[data_resampled["user_id"].isin(val_users)]
+test_df = data_resampled[data_resampled["user_id"].isin(test_users)]
+
+assert set(train_users).isdisjoint(val_users)
+assert set(train_users).isdisjoint(test_users)
+assert set(val_users).isdisjoint(test_users)
+
+# 9. Export Processed Data
+
+output_dir = "../../data/processed/"
+os.makedirs(output_dir, exist_ok=True)
+
+data_resampled.to_pickle(os.path.join(output_dir, "data_processed.pkl"))
+train_df.to_pickle(os.path.join(output_dir, "train.pkl"))
+val_df.to_pickle(os.path.join(output_dir, "val.pkl"))
+test_df.to_pickle(os.path.join(output_dir, "test.pkl"))
+
+print("train users:", train_users)
+print("val users:", val_users)
+print("test users:", test_users)
