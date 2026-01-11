@@ -10,7 +10,7 @@ plt.rcParams["figure.figsize"] = (20, 5)
 plt.rcParams["figure.dpi"] = 100
 
 df = pd.read_pickle("../../data/processed/data_processed.pkl")
-
+df.info()
 os.makedirs("../../reports/figures/", exist_ok=True)
 
 # 2. Data Balance
