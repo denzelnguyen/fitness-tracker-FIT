@@ -10,80 +10,121 @@ plt.rcParams["figure.figsize"] = (20, 5)
 plt.rcParams["figure.dpi"] = 100
 
 df = pd.read_pickle("../../data/processed/data_processed.pkl")
-df.info()
 os.makedirs("../../reports/figures/", exist_ok=True)
 
-# 2. Data Balance
+LABEL_NAME = {
+    0: "dws",
+    1: "ups",
+    2: "wlk",
+    3: "jog",
+    4: "sit",
+    5: "std"
+}
 
-balance = df["category"].value_counts().sort_index()
+# 2. Data Balance (a)
+
+balance = df["label"].value_counts().sort_index()
 
 plt.figure()
 balance.plot(kind="bar")
+plt.xticks(balance.index, [LABEL_NAME[l] for l in balance.index])
 plt.title("Data Balance per Activity")
 plt.xlabel("Activity")
+plt.xticks(rotation=0)
 plt.ylabel("Samples")
 plt.tight_layout()
-plt.savefig("../../reports/figures/data_balance.png", dpi=150)
 plt.show()
 
-# 3. Explore Single Columns
+# 3. Compare multiple activities on the same plot (b)
 
-set_id = df["set"].iloc[0]
-set_df = df[df["set"] == set_id]
+def plot_signals(
+    df,
+    labels,
+    acc_cols=["acc_x", "acc_y", "acc_z"],
+    gyr_cols=["gyr_x", "gyr_y", "gyr_z"],
+    n_samples=500,
+    title=""
+):
+    fig, axes = plt.subplots(nrows=2, figsize=(14, 8), sharex=True)
 
-plt.figure()
-plt.plot(set_df["acc_y"].reset_index(drop=True))
-plt.title("Raw Signal - Acc Y (Single Set)")
-plt.xlabel("Samples")
-plt.ylabel("Acc Y")
-plt.tight_layout()
-plt.savefig("../../reports/figures/raw_signal_acc_y.png", dpi=150)
-plt.show()
+    user = df[df["label"].isin(labels)]["user_id"].iloc[0]
 
-# 4. Plot All Activities
+    for label in labels:
+        subset = (
+            df[(df["label"] == label) & (df["user_id"] == user)]
+            .head(n_samples)
+            .reset_index(drop=True)
+        )
+        for col in acc_cols:
+            axes[0].plot(subset[col], label=f"{LABEL_NAME[label]}_{col[-1]}")
 
-labels = sorted(df["category"].unique())
+    axes[0].set_title(f"{title} Accelerometer")
+    axes[0].set_ylabel("Acceleration")
+    axes[0].legend(ncol=3)
 
-for label in labels:
-    subset = df[df["category"] == label].head(500)
+    for label in labels:
+        subset = (
+            df[(df["label"] == label) & (df["user_id"] == user)]
+            .head(n_samples)
+            .reset_index(drop=True)
+        )
+        for col in gyr_cols:
+            axes[1].plot(subset[col], label=f"{LABEL_NAME[label]}_{col[-1]}")
 
-    plt.figure()
-    plt.plot(subset["acc_x"], label="x")
-    plt.plot(subset["acc_y"], label="y")
-    plt.plot(subset["acc_z"], label="z")
-    plt.title(f"Activity Signal - {label.upper()}")
-    plt.xlabel("Samples")
-    plt.ylabel("Acceleration")
-    plt.legend()
+    axes[1].set_title(f"{title} Gyroscope")
+    axes[1].set_xlabel("Time steps (200ms)")
+    axes[1].set_ylabel("Angular Velocity")
+    axes[1].legend(ncol=3)
+
     plt.tight_layout()
-    plt.savefig(f"../../reports/figures/timeseries_{label}.png", dpi=150)
     plt.show()
 
-# 5. Compare Participants
+plot_signals(df, [3, 5], title="JOG VS STD")
+plot_signals(df, [3, 4], title="JOG VS SIT")
 
-activity = "wlk"
-users = df[df["category"] == activity]["user_id"].unique()[:2]
+# 4. Compare multiple participants in an activity (c)
+
+label = 2
+
+user_info = (
+    df[df["label"] == label]
+    .groupby("user_id")[["height", "weight"]]
+    .first()
+    .sort_values("height")
+)
+
+short_user = user_info.iloc[0]
+tall_user = user_info.iloc[-1]
 
 plt.figure()
-for u in users:
-    u_df = df[(df["category"] == activity) & (df["user_id"] == u)].head(500)
-    plt.plot(u_df["acc_y"].reset_index(drop=True), label=f"user_{u}")
 
-plt.title(f"User Comparison - {activity.upper()}")
-plt.xlabel("Samples")
+for u, info in zip(
+    [short_user.name, tall_user.name],
+    [short_user, tall_user]
+):
+    u_df = (
+        df[(df["label"] == label) & (df["user_id"] == u)]
+        .head(500)
+        .reset_index(drop=True)
+    )
+
+    plt.plot(
+        u_df["acc_y"],
+        label=f"user_{u} ({info.height}cm, {info.weight}kg)"
+    )
+
+plt.title("User Comparison - WLK (Height and Weight)")
+plt.xlabel("Time steps (200ms)")
 plt.ylabel("Acc Y")
 plt.legend()
 plt.tight_layout()
-plt.savefig(f"../../reports/figures/user_comparison_{activity}.png", dpi=150)
 plt.show()
 
-# 6. Multiple Axes Plot
-
-label = "jog"
-user = df[df["category"] == label]["user_id"].iloc[0]
+label = 3
+user = df[df["label"] == label]["user_id"].iloc[0]
 
 multi_axis_df = (
-    df.query(f"category == '{label}' and user_id == {user}")
+    df[(df["label"] == label) & (df["user_id"] == user)]
     .head(500)
     .reset_index(drop=True)
 )
@@ -92,35 +133,33 @@ plt.figure()
 plt.plot(multi_axis_df["acc_x"], label="x")
 plt.plot(multi_axis_df["acc_y"], label="y")
 plt.plot(multi_axis_df["acc_z"], label="z")
-plt.title(f"3-Axis Acceleration - {label.upper()} (User {user})")
-plt.xlabel("Samples")
+plt.title(f"3-Axis Acceleration - {LABEL_NAME[label].upper()} (User {user})")
+plt.xlabel("Time steps (200ms)")
 plt.ylabel("Acceleration")
 plt.legend()
 plt.tight_layout()
-plt.savefig(f"../../reports/figures/3axis_{label}_user{user}.png", dpi=150)
 plt.show()
 
-# 7. Distribution and Correlation
+# 5. Correlation
 
 corr_df = df[["acc_x", "acc_y", "acc_z", "gyr_x", "gyr_y", "gyr_z"]].corr()
 
 plt.figure(figsize=(10, 8))
-sns.heatmap(corr_df, annot=True, fmt=".2f", cmap="coolwarm")
+sns.heatmap(corr_df, annot=True, fmt=".2f", cmap="coolwarm", square=True)
 plt.title("Sensor Correlation Heatmap")
 plt.tight_layout()
-plt.savefig("../../reports/figures/correlation_heatmap.png", dpi=150)
 plt.show()
 
+# 6. Checklist
+
 plt.figure()
-sns.boxplot(x="category", y="acc_y", data=df)
+sns.boxplot(x="label", y="acc_y", data=df)
+plt.xticks(df["label"].unique(), [LABEL_NAME[l] for l in df["label"].unique()])
 plt.title("Acceleration Distribution per Activity")
 plt.xlabel("Activity")
 plt.ylabel("Acc Y")
 plt.tight_layout()
-plt.savefig("../../reports/figures/boxplot_acc_y.png", dpi=150)
 plt.show()
-
-# 8. Motion Shape
 
 scatter_df = df.sample(5000, random_state=42)
 
@@ -128,7 +167,7 @@ plt.figure()
 sns.scatterplot(
     x="acc_x",
     y="acc_y",
-    hue="category",
+    hue="label",
     data=scatter_df,
     legend=False
 )
@@ -136,32 +175,4 @@ plt.title("Motion Shape (Acc X vs Acc Y)")
 plt.xlabel("Acc X")
 plt.ylabel("Acc Y")
 plt.tight_layout()
-plt.savefig("../../reports/figures/scatter_motion_shape.png", dpi=150)
 plt.show()
-
-# 9. Mass Export Figures
-
-test_users = df["user_id"].unique()[:3]
-
-for label in labels:
-    for user in test_users:
-        subset = df.query(
-            f"category == '{label}' and user_id == {user}"
-        ).head(500)
-
-        if subset.empty:
-            continue
-
-        fig, ax = plt.subplots(nrows=2, sharex=True, figsize=(20, 10))
-
-        subset[["acc_x", "acc_y", "acc_z"]].plot(ax=ax[0])
-        ax[0].set_title(f"{label.upper()} - User {user}")
-        ax[0].set_ylabel("Acceleration")
-
-        subset[["gyr_x", "gyr_y", "gyr_z"]].plot(ax=ax[1])
-        ax[1].set_ylabel("Gyroscope")
-        ax[1].set_xlabel("Samples")
-
-        plt.tight_layout()
-        plt.savefig(f"../../reports/figures/{label}_user{user}.png", dpi=150)
-        plt.close(fig)
