@@ -73,6 +73,69 @@ all_df = all_df[
 all_df["time_ms"] = all_df.groupby("set").cumcount() * 20
 all_df.index = pd.to_datetime(all_df["time_ms"], unit="ms")
 
+# Plot raw signals
+
+import matplotlib.pyplot as plt
+
+LABEL_NAME = {3: "jog", 5: "std"}
+
+plot_user = (
+    all_df[all_df["label"].isin([3, 5])]
+    .groupby("user_id")
+    .filter(lambda x: set(x["label"]) == {3, 5})
+    ["user_id"]
+    .iloc[0]
+)
+
+n_samples = 2000  
+
+fig, axes = plt.subplots(nrows=2, figsize=(14, 8), sharex=True)
+
+for label in [3, 5]: 
+    subset = (
+        all_df[
+            (all_df["user_id"] == plot_user) &
+            (all_df["label"] == label)
+        ]
+        .iloc[:n_samples]
+    )
+
+    for col in ["acc_x", "acc_y", "acc_z"]:
+        axes[0].plot(
+            subset.index,
+            subset[col],
+            label=f"{LABEL_NAME[label]}_{col[-1]}"
+        )
+
+axes[0].set_title("STD vs JOG (Raw 50Hz) - Accelerometer")
+axes[0].set_ylabel("Acceleration")
+axes[0].legend(ncol=3)
+
+for label in [3, 5]:
+    subset = (
+        all_df[
+            (all_df["user_id"] == plot_user) &
+            (all_df["label"] == label)
+        ]
+        .iloc[:n_samples]
+    )
+
+    for col in ["gyr_x", "gyr_y", "gyr_z"]:
+        axes[1].plot(
+            subset.index,
+            subset[col],
+            label=f"{LABEL_NAME[label]}_{col[-1]}"
+        )
+
+axes[1].set_title("STD vs JOG (Raw 50Hz) - Gyroscope")
+axes[1].set_xlabel("Time (20ms per sample)")
+axes[1].set_ylabel("Angular Velocity")
+axes[1].legend(ncol=3)
+
+plt.tight_layout()
+plt.show()
+
+
 # 6. Resampling (Rule: 200ms)
 
 sampling = {
