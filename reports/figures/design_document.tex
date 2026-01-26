@@ -1,0 +1,98 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{changepage}
+
+\title{Fitness Tracking}
+\author{
+Group 5\\
+\small Department of Computer Science\\
+\small University of Science and Technology
+}
+\date{January 31, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{adjustwidth}{1cm}{1cm}
+   \noindent \textbf{Abstract.}Human Activity Recognition (HAR), along with specialty fitness tracking, is a vital component of modern health-monitoring ecosystems. While smartphones are ubiquitous, their potential for automatically tracking physical exercises and providing real-time feedback remains an area of active research. The aim of this paper is to explore the possibilities of context-aware applications by analyzing the MotionSense dataset, which contains tri-axial accelerometer and gyroscope data collected from an iPhone 6s. Unlike traditional wrist-based studies, this research evaluates motion data captured from the user's pocket across 24 participants performing various activities, including walking, jogging, and climbing stairs. The goal is to develop and evaluate supervised learning models that can function as an automated monitoring system—identifying specific activity types, estimating intensity, and distinguishing between different movement patterns. Various machine learning algorithms are trained using the time-series features extracted from the dataset, and their accuracies are compared to identify the most robust model for practical context-aware deployment.
+\end{adjustwidth}
+
+\section{Introduction}
+\begin{adjustwidth}{1cm}{1cm}
+
+During the last decade, the integration of high-performance inertial sensors within mobile devices has revolutionized the field of Human Activity Recognition (HAR). Modern smartphones, equipped with tri-axial accelerometers and gyroscopes, offer a non-invasive and cost-effective means to monitor physical behavior in real-world settings. This technological advancement has enabled a wide range of applications, from simple step counting to sophisticated context-aware systems capable of analyzing exercise intensity and form.
+
+The primary objective of this study is to explore the potential of the MotionSense dataset for developing robust activity classification models. This dataset provides a unique opportunity for research as it captures motion data from an iPhone 6s kept in the user's front pocket—a natural position for everyday device carriage. The data encompasses six distinct activities: walking, jogging, sitting, standing, and climbing stairs (up and down), performed by 24 participants of varying demographic backgrounds.
+
+By analyzing the 12-feature time-series data, including attitude (quaternions), gravity, rotation rate, and user acceleration, we aim to build supervised learning models that can accurately identify user states. Similar to the logic applied in automated strength training systems, which track repetitions and detect improper form, this paper evaluates how different machine learning algorithms can interpret raw smartphone signals to provide meaningful context-aware feedback for physical health monitoring.
+\end{adjustwidth}
+
+\section{Related Work}
+\begin{adjustwidth}{1cm}{1cm}
+The landscape of Human Activity Recognition (HAR) has evolved significantly with the advancement of mobile and wearable technology. Early foundational work, such as the MotionSense study, established the efficacy of using smartphone-based inertial sensors—specifically tri-axial accelerometers and gyroscopes—to classify basic daily movements like walking, jogging, and climbing stairs. This research demonstrated that sensors placed in a user's pocket could yield high-accuracy results, provided that gravity and body acceleration components were effectively decoupled.
+
+Recent developments have shifted toward multi-modal sensing to capture more complex physiological states. Beyond simple movement classification, researchers are now integrating biometrics with motion data. For instance, datasets that combine smartphone and smartwatch signals allow for a more granular analysis of user behavior by capturing both limb movement and heart rate. This holistic approach is crucial for applications in health monitoring where physical exertion levels need to be correlated with heart rate variability and other vital signs.
+
+Furthermore, the field is moving toward specialized domains, such as the detection of fatigue or the monitoring of specific exercise forms. Recent studies have utilized advanced deep learning architectures, including Convolutional Neural Networks (CNN) and Gated Recurrent Units (GRU), to process time-series data from wearables. These models are designed to identify subtle patterns in movement that indicate the onset of physical exhaustion or improper technique, bridging the gap between general activity logging and professional-grade sports science. By leveraging these diverse datasets and algorithmic improvements, context-aware systems are becoming increasingly capable of providing personalized, real-time feedback to users.
+\end{adjustwidth}
+
+\section{Related Work}
+\begin{adjustwidth}{1cm}{1cm}
+The first paper that we research on activity recognition using wearable sensors was published by Wei Xie,Xi Zhao, Hang Chen in 10 June 2025 [1]. The paper explores the use of machine learning algorithms to analyze fitness data collected from smart wearable devices and to predict training effectiveness. Several models, including decision trees, support vector machines, naïve Bayes, and random forests, are applied and compared, with the random forest model achieving the highest prediction accuracy and stability. The results show that physiological factors such as body fat percentage, maximum heart rate, and age play a dominant role in determining training outcomes, while short-term physiological indicators are more influential than long-term exercise habits. Overall, the study demonstrates that machine learning can effectively transform large-scale fitness data into actionable insights, supporting personalized training recommendations and the development of intelligent fitness systems.
+
+Next, we present the paper the Kaggle “Smartphone and Smartwatch Activity and Biometrics” was published by Gary M. Weiss [2]. Dthe dataset (also known as the WISDM dataset) is a large multivariate time-series collection of inertial sensor data recorded from both smartphones and smartwatches, as 51 participants performed 18 different everyday activities (such as walking, jogging, climbing stairs, eating, and folding clothes) for three minutes each. The dataset includes synchronized accelerometer and gyroscope readings sampled at 20 Hz from both devices, along with identifiers for the subject and activity, enabling researchers to build and evaluate human activity-recognition models or behavioral biometric systems. It is widely used for machine learning research on wearable sensor data and supports tasks such as classification, feature extraction, and biometric modeling.
+
+Final, this paper presents a hybrid deep learning approach was created by Sizhen Bian, Vitor Fortes Rey, Siyu Yuan, Paul Lukowicz [3] that combines convolutional neural networks (CNNs), dilated self-attention modules, and data from both inertial measurement units (IMUs) and body-area electrostatic sensing (HBC) to improve recognition and analysis of gym workouts. By collecting a 50-hour dataset from ten volunteers performing exercises, the authors show that including HBC signals alongside traditional IMU data slightly increases activity recognition accuracy and substantially enhances the ability to count repetitions. They demonstrate that their model effectively identifies workout types, counts repetitions, and supports user authentication, providing evidence that HBC is a valuable complement to wearable motion sensing for fitness monitoring and biometric applications.
+\end{adjustwidth}
+
+\section{Experimental Setup}
+\begin{quote}
+The experimental phase was designed to capture a diverse range of human movements under controlled yet realistic conditions to ensure the robustness of the activity recognition models.
+\subsection{Participants and Environment}
+The study involved a cohort of 24 participants with diverse physical characteristics to ensure data variability. The demographic distribution included various age groups, weights, and heights, providing a comprehensive representation of potential users. All experiments were conducted in a consistent physical environment, utilizing the same sensors and recording protocols for every subject.
+
+\subsection{Hardware and Data Acquisition}
+Data collection was performed using an iPhone 6s smartphone. The device was equipped with high-precision inertial sensors, including a tri-axial accelerometer and a tri-axial gyroscope. During all trials, the smartphone was kept in the user's front pocket, which is a common and natural position for carrying mobile devices in daily life. The SensorLog application was employed to record the raw signals at a constant sampling rate of 50Hz.
+
+\subsection{Trial Protocol and Activities}
+
+The experimental procedure consisted of 15 distinct trials per participant, covering six basic types of activities:
+ 
+ + Stationary Activities: These included "Sitting" and "Standing," where the device recorded the baseline orientation and minimal movement noise.
+
++ Dynamic Activities: Participants performed "Walking" and "Jogging" on flat ground to capture steady-state rhythmic motion patterns.
+
++ Vertical Transitions: To analyze changes in altitude and effort, trials for "Upstairs" and "Downstairs" were conducted.
+
+The trials were categorized into two types: long-duration trials, intended to capture continuous steady-state movement, and short-duration trials, which focused on more intense or transitional movements. A total of 12 features were extracted from each time-stamped record, including Attitude (quaternions), Gravity, Rotation Rate, and User Acceleration.
+\end{quote}
+
+\section{Converting Raw Data}
+\begin{adjustwidth}{1cm}{1cm}
+
+
+
+\end{adjustwidth}
+
+\begin{thebibliography}{9}
+\bibitem{Fitness Tracking}
+Intelligent Fitness Data Analysis and training Effect Prediction Based on Machine Learning Algorithms Wei Xie, Xi Zhao, Hang Chen
+\url{https://www.preprints.org/manuscript/202506.0753}
+
+\bibitem{Smartphone and Smartwatch Activity and Biometrics Dataset}
+WISDM Smartphone and Smartwatch Activity and Biometrics Dataset. Gary M. Weiss Department of Computer and Information Science. Fordham University. 441 East Fordham Road, Bronx NY 10458. Email: gaweiss@fordham.edu
+\url{https://www.kaggle.com/datasets/mashlyn/smartphone-and-smartwatch-activity-and-biometrics/data}
+
+\bibitem{Hybrid CNN-Dilated Self-attention Model}
+Hybrid CNN-Dilated Self-attention Model Using Inertial and Body-Area Electrostatic Sensing for Gym Workout Recognition, Counting, and User Authentification. Sizhen Bian, Vitor Fortes Rey, Siyu Yuan, Paul Lukowicz
+\url{https://arxiv.org/abs/2503.06311}
+
+\end{thebibliography}
+\end{document}
