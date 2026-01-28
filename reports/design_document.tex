@@ -4,6 +4,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath,amsfonts,amssymb}
 \usepackage{graphicx}
+\usepackage{subcaption}
 \usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{changepage}
@@ -34,14 +35,6 @@ The primary objective of this study is to explore the potential of the MotionSen
 By analyzing the 12-feature time-series data, including attitude (quaternions), gravity, rotation rate, and user acceleration, we aim to build supervised learning models that can accurately identify user states. Similar to the logic applied in automated strength training systems, which track repetitions and detect improper form, this paper evaluates how different machine learning algorithms can interpret raw smartphone signals to provide meaningful context-aware feedback for physical health monitoring.
 \end{adjustwidth}
 
-\section{Related Work}
-\begin{adjustwidth}{1cm}{1cm}
-The landscape of Human Activity Recognition (HAR) has evolved significantly with the advancement of mobile and wearable technology. Early foundational work, such as the MotionSense study, established the efficacy of using smartphone-based inertial sensors—specifically tri-axial accelerometers and gyroscopes—to classify basic daily movements like walking, jogging, and climbing stairs. This research demonstrated that sensors placed in a user's pocket could yield high-accuracy results, provided that gravity and body acceleration components were effectively decoupled.
-
-Recent developments have shifted toward multi-modal sensing to capture more complex physiological states. Beyond simple movement classification, researchers are now integrating biometrics with motion data. For instance, datasets that combine smartphone and smartwatch signals allow for a more granular analysis of user behavior by capturing both limb movement and heart rate. This holistic approach is crucial for applications in health monitoring where physical exertion levels need to be correlated with heart rate variability and other vital signs.
-
-Furthermore, the field is moving toward specialized domains, such as the detection of fatigue or the monitoring of specific exercise forms. Recent studies have utilized advanced deep learning architectures, including Convolutional Neural Networks (CNN) and Gated Recurrent Units (GRU), to process time-series data from wearables. These models are designed to identify subtle patterns in movement that indicate the onset of physical exhaustion or improper technique, bridging the gap between general activity logging and professional-grade sports science. By leveraging these diverse datasets and algorithmic improvements, context-aware systems are becoming increasingly capable of providing personalized, real-time feedback to users.
-\end{adjustwidth}
 
 \section{Related Work}
 \begin{adjustwidth}{1cm}{1cm}
@@ -55,6 +48,48 @@ Final, this paper presents a hybrid deep learning approach was created by Sizhen
 \section{Experimental Setup}
 \begin{quote}
 The experimental phase was designed to capture a diverse range of human movements under controlled yet realistic conditions to ensure the robustness of the activity recognition models.
+
+\begin{figure}[htbp]
+    \centering
+    % Hoạt động 1: Downstairs
+    \begin{subfigure}[b]{0.18\textwidth}
+        \centering
+        \includegraphics[width=\textwidth, height=3cm, keepaspectratio]{man-walks-down-stairs-stick-260nw-1447167077.jpg}
+        \caption{Downstairs and Upstairs}
+    \end{subfigure}
+    \hfill
+    % Hoạt động 2: Walking
+    \begin{subfigure}[b]{0.18\textwidth}
+        \centering
+        \includegraphics[width=\textwidth, height=3cm, keepaspectratio]{vecteezy_person-walking-icon_7126667.jpg}
+        \caption{Walking}
+    \end{subfigure}
+    \hfill
+    % Hoạt động 3: Sitting
+    \begin{subfigure}[b]{0.18\textwidth}
+        \centering
+        \includegraphics[width=\textwidth, height=3cm, keepaspectratio]{man-sitting-sit-bench-chair-260nw-2279430945.jpg}
+        \caption{Sitting}
+    \end{subfigure}
+    \hfill
+    % Hoạt động 4: Standing
+    \begin{subfigure}[b]{0.18\textwidth}
+        \centering
+        \includegraphics[width=\textwidth, height=3cm, keepaspectratio]{stick-figure-man-person-stand-260nw-2279865073.jpg}
+        \caption{Standing}
+    \end{subfigure}
+    \hfill
+    % Hoạt động 5: Jogging
+    \begin{subfigure}[b]{0.18\textwidth}
+        \centering
+        \includegraphics[width=\textwidth, height=3cm, keepaspectratio]{stickman-illustration-running-fast-action-free-vector.jpg}
+        \caption{Jogging}
+    \end{subfigure}
+
+    \caption{The activites in the project.}
+    \label{fig:five_activities}
+\end{figure}
+
 \subsection{Participants and Environment}
 The study involved a cohort of 24 participants with diverse physical characteristics to ensure data variability. The demographic distribution included various age groups, weights, and heights, providing a comprehensive representation of potential users. All experiments were conducted in a consistent physical environment, utilizing the same sensors and recording protocols for every subject.
 
@@ -75,11 +110,25 @@ The trials were categorized into two types: long-duration trials, intended to ca
 \end{quote}
 
 \section{Converting Raw Data}
-\begin{adjustwidth}{1cm}{1cm}
+\begin{quote}
+The implementation begins by consolidating the raw dataset, which contains a total of 1412865 entries, including epoch timestamps and x, y, z sensor values. It is collected with an iPhone 6s kept in the participant's front pocket using SensingKit which collects information from Core Motion framework on iOS devices. As individual measurements are distributed across multiple files based on unique timestamps, the code first performs a global aggregation. To adhere to the project's requirement of minimizing information loss, a resampling frequency of $\Delta t = 0.20\ \mathrm{s}$ (5Hz) is applied via the .resample("200ms") function. Numerical attributes, such as acceleration and rotation rates, are aggregated using the mean, while categorical labels are preserved using the "last" value to maintain state consistency.
+Following aggregation, the code constructs total acceleration features by combining userAcceleration and gravity components. This preprocessing step ensures that the dataset provides a robust starting point for visualization. By plotting the processed signals, unique patterns and repetitions of activities—such as accelerometer data from each activities—can be identified from the peaks and troughs in the waveform, consistent with the observations in Figure 2.
+
+Figure 3 illustrates the distinct differences in $y$-acceleration between jogging and standing activities for a single user. The jogging data are characterized by high-frequency oscillations with sharp, repetitive peaks and deep troughs, reflecting the rhythmic impact of each stride against the ground. In contrast, the standing data show a relatively flat signal with minimal variance, representing only subtle postural adjustments and sensor noise.
+
+\subsection{Low-pass Filter}
+To handle the inherent noise in the raw sensor data, the code prepares the signals for temporal smoothing. While initial cleaning removes null values and renames the axes for clarity (e.g. gyr\_x, gyr\_y), the structure is designed to support a Butterworth low-pass filter. As suggested by the visual inspection in the report, this filter is intended to remove high-frequency noise that might disturb the learning process, focusing on movements that typically occur at a frequency of approximately 2 seconds per repetition.
+
+\subsection{Principal Component Analysis (PCA)}
+The final stage of the code prepares the data for Principal Component Analysis (PCA) to identify the features explaining the maximum variance. By organizing sensor data in a structured format (incorporating acc, gyr, and attitude metrics), the script facilitates the reduction of dimensionality. Following the logic in Figure 4, the code aims to condense the multi-dimensional sensor space into the 3 primary components that capture the essential movement dynamics, which are then integrated back into the dataset for model training.
 
 
 
-\end{adjustwidth}
+
+\end{quote}
+
+\section{Feature Engineering}
+
 
 \begin{thebibliography}{9}
 \bibitem{Fitness Tracking}
@@ -91,7 +140,7 @@ WISDM Smartphone and Smartwatch Activity and Biometrics Dataset. Gary M. Weiss D
 \url{https://www.kaggle.com/datasets/mashlyn/smartphone-and-smartwatch-activity-and-biometrics/data}
 
 \bibitem{Hybrid CNN-Dilated Self-attention Model}
-Hybrid CNN-Dilated Self-attention Model Using Inertial and Body-Area Electrostatic Sensing for Gym Workout Recognition, Counting, and User Authentification. Sizhen Bian, Vitor Fortes Rey, Siyu Yuan, Paul Lukowicz
+Hybrid CNN-Dilated Self-attention Model Using Inertial and Body-Area Electrostatic Sensing for Gym Workout Recognition, Counting, and User Authentification. Sizhen Bian, Vitor Fortes Rey, Siyu Yuan, Paul Lukowicz.
 \url{https://arxiv.org/abs/2503.06311}
 
 \end{thebibliography}
