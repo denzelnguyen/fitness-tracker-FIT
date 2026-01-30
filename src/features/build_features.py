@@ -110,7 +110,6 @@ features_test = extract_window_features(test_df, window_size=WINDOW_SIZE)
 
 #Biến đổi data với hàm ở trên (data transform).
 
-
 #10 dòng dữ liệu -> 1 dòng đặc trưng.
 # print(f"\nFeatures extracted:")
 # print(f"All data: {features_data.shape}")
@@ -148,7 +147,6 @@ features_test[feature_cols] = imputer.transform(features_test[feature_cols])
 #OUTCOME: Check các giá trị NaN và Inf -> thay thế sử dụng median (trung vị) -> fit data với tập train
 # -> sau đó transform với các tất cả các tập (data, train ,val, test).
 
-
 #FEATURE SCALING.
 print(f"Number of features to scale: {len(feature_cols)}")
 
@@ -163,7 +161,6 @@ features_val[feature_cols] = scaler.transform(features_val[feature_cols])
 features_test[feature_cols] = scaler.transform(features_test[feature_cols])
 #OUTCOME: Đưa hết tất cả về 1 thang đo -> tránh khi training model bị sai lệch.
 
-
 #DATA VALIDATION.(CHECK LẦN CUỐI TRƯỚC KHI EXPORT).
 # Check for remaining NaN or infinity
 assert features_train.isna().sum().sum() == 0, "Training data contains NaN!"
@@ -175,15 +172,12 @@ assert np.isinf(features_val.select_dtypes(include=[np.number])).sum().sum() == 
 assert np.isinf(features_test.select_dtypes(include=[np.number])).sum().sum() == 0, "Test data contains infinity!"
 #OUTCOME: sài Assert để check nếu có lỗi là sẽ dừng ngay.
 
-
-
 # Check label distribution
 print("\nLabel distribution:")
 print(f"Train: {features_train['label'].value_counts().sort_index()}")
 print(f"Val: {features_val['label'].value_counts().sort_index()}")
 print(f"Test: {features_test['label'].value_counts().sort_index()}")
 #OUTCOME: Nhìn ra feature nào chiếm nhiều, ít.., 
-
 
 #Export feature.
 print("\nExporting features...")
@@ -222,52 +216,3 @@ print(f"  Val:   {features_val.shape[0]} samples")
 print(f"  Test:  {features_test.shape[0]} samples")
 print(f"  Total: {features_data.shape[0]} samples")
 #OUTCOME: Trích suất file cho phần training model.
-
-import matplotlib.pyplot as plt
-
-label_counts = features_train['label'].value_counts().sort_index()
-
-plt.figure()
-plt.bar(label_counts.index, label_counts.values)
-plt.xlabel("Activity label")
-plt.ylabel("Number of windows")
-plt.title("Label Distribution after Windowing (Train set)")
-plt.show()
-
-
-plt.figure()
-
-for label in features_train['label'].unique():
-    subset = features_train[features_train['label'] == label]
-    plt.scatter(
-        subset['acc_mag_rms'],
-        subset['gyr_mag_rms'],
-        label=label,
-        alpha=0.5
-    )
-
-plt.xlabel("Acceleration RMS")
-plt.ylabel("Gyroscope RMS")
-plt.title("Movement Intensity by Activity")
-plt.legend()
-plt.show()
-
-
-
-import numpy as np
-
-selected_features = [
-    'acc_x_mean', 'acc_y_mean', 'acc_z_mean',
-    'acc_mag_mean', 'acc_mag_std',
-    'gyr_mag_mean', 'gyr_mag_std'
-]
-
-corr = features_train[selected_features].corr()
-
-plt.figure()
-plt.imshow(corr)
-plt.colorbar()
-plt.xticks(range(len(selected_features)), selected_features, rotation=45)
-plt.yticks(range(len(selected_features)), selected_features)
-plt.title("Feature Correlation Matrix")
-plt.show()

@@ -4,7 +4,6 @@ import seaborn as sns
 import os
 
 # 1. Setup and Load Data
-
 plt.style.use("fivethirtyeight")
 plt.rcParams["figure.figsize"] = (20, 5)
 plt.rcParams["figure.dpi"] = 100
@@ -21,8 +20,7 @@ LABEL_NAME = {
     5: "std"
 }
 
-# 2. Data Balance (a)
-
+# 2. Data Balance
 balance = df["label"].value_counts().sort_index()
 
 plt.figure()
@@ -35,8 +33,7 @@ plt.ylabel("Samples")
 plt.tight_layout()
 plt.show()
 
-# 3. Compare multiple activities on the same plot (b)
-
+# 3. Compare multiple activities on the same plot
 def plot_signals(
     df,
     labels,
@@ -82,8 +79,7 @@ def plot_signals(
 plot_signals(df, [3, 5], title="JOG VS STD")
 plot_signals(df, [3, 4], title="JOG VS SIT")
 
-# 4. Compare multiple participants in an activity (c)
-
+# 4. Compare multiple participants in an activity
 label = 2
 
 user_info = (
@@ -120,28 +116,7 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 
-label = 3
-user = df[df["label"] == label]["user_id"].iloc[0]
-
-multi_axis_df = (
-    df[(df["label"] == label) & (df["user_id"] == user)]
-    .head(500)
-    .reset_index(drop=True)
-)
-
-plt.figure()
-plt.plot(multi_axis_df["acc_x"], label="x")
-plt.plot(multi_axis_df["acc_y"], label="y")
-plt.plot(multi_axis_df["acc_z"], label="z")
-plt.title(f"3-Axis Acceleration - {LABEL_NAME[label].upper()} (User {user})")
-plt.xlabel("Time steps (200ms)")
-plt.ylabel("Acceleration")
-plt.legend()
-plt.tight_layout()
-plt.show()
-
 # 5. Correlation
-
 corr_df = df[["acc_x", "acc_y", "acc_z", "gyr_x", "gyr_y", "gyr_z"]].corr()
 
 plt.figure(figsize=(10, 8))
@@ -150,8 +125,7 @@ plt.title("Sensor Correlation Heatmap")
 plt.tight_layout()
 plt.show()
 
-# 6. Checklist
-
+# 6. Boxplot
 plt.figure()
 sns.boxplot(x="label", y="acc_y", data=df)
 plt.xticks(df["label"].unique(), [LABEL_NAME[l] for l in df["label"].unique()])
@@ -161,6 +135,7 @@ plt.ylabel("Acc Y")
 plt.tight_layout()
 plt.show()
 
+# 7. Scatter plot
 scatter_df = df.sample(5000, random_state=42)
 
 plt.figure()
