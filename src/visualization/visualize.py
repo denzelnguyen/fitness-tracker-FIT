@@ -9,7 +9,6 @@ plt.rcParams["figure.figsize"] = (20, 5)
 plt.rcParams["figure.dpi"] = 100
 
 df = pd.read_pickle("../../data/processed/data_processed.pkl")
-os.makedirs("../../reports/figures/", exist_ok=True)
 
 LABEL_NAME = {
     0: "dws",

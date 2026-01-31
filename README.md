@@ -42,7 +42,6 @@
 | attitude.pitch          | Device pitch angle (radians)                                  |
 | attitude.yaw            | Device yaw angle (radians)                                    |
 | gravity.x/y/z           | 3-axis gravity vector (m/s²)                                  |
-| timestamp               | Human-readable date and time of capture                       |
 
 ## 4. Related Work
 ### 4.1 Activity Recognition using Smartphone and Smartwatch Sensors (WISDM)
