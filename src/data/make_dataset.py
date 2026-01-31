@@ -2,7 +2,6 @@ import pandas as pd
 from glob import glob
 import os
 
-
 data_path = "../../data/raw/Dataset(raw)"
 subjects_info_path = "../../data/raw/data_subjects_info.csv"
 
